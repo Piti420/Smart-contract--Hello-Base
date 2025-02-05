@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GM Base</title>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
+</head>
+<body>
+    <h1>GM Base</h1>
+    <p>Current Greeting: <span id="currentGreeting">Loading...</span></p>
+    <p>Last Greeter: <span id="lastGreeter">Loading...</span></p>
+    <p>Greeting Count: <span id="greetingCount">Loading...</span></p>
+    <input type="text" id="newGreeting" placeholder="Enter your GM message">
+    <button onclick="connectAndSayGM()">Say GM</button>
+
+    <script>
+        // ABI kontraktu
+        const contractABI = [
+            {
+                "type": "constructor",
+                "inputs": [],
+                "stateMutability": "nonpayable"
+            },
+            {
+                "type": "function",
+                "name": "getGreeting",
+                "inputs": [],
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "string",
+                        "internalType": "string"
+                    }
+                ],
+                "stateMutability": "view"
+            },
+            {
+                "type": "function",
+                "name": "getGreetingCount",
+                "inputs": [],
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    }
+                ],
+                "stateMutability": "view"
+            },
+            {
+                "type": "function",
+                "name": "getLastGreeter",
+                "inputs": [],
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "address",
+                        "internalType": "address"
+                    }
+                ],
+                "stateMutability": "view"
+            },
+            {
+                "type": "function",
+                "name": "greeting",
+                "inputs": [],
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "string",
+                        "internalType": "string"
+                    }
+                ],
+                "stateMutability": "view"
+            },
+            {
+                "type": "function",
+                "name": "greetingCount",
+                "inputs": [],
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    }
+                ],
+                "stateMutability": "view"
+            },
+            {
+                "type": "function",
+                "name": "lastGreeter",
+                "inputs": [],
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "address",
+                        "internalType": "address"
+                    }
+                ],
+                "stateMutability": "view"
+            },
+            {
+                "type": "function",
+                "name": "sayGM",
+                "inputs": [
+                    {
+                        "name": "_message",
+                        "type": "string",
+                        "internalType": "string"
+                    }
+                ],
+                "outputs": [],
+                "stateMutability": "nonpayable"
+            },
+            {
+                "type": "event",
+                "name": "NewGM",
+                "inputs": [
+                    {
+                        "name": "greeter",
+                        "type": "address",
+                        "indexed": true,
+                        "internalType": "address"
+                    },
+                    {
+                        "name": "message",
+                        "type": "string",
+                        "indexed": false,
+                        "internalType": "string"
+                    }
+                ],
+                "anonymous": false
+            }
+        ];
+
+        // Bytecode kontraktu 0x608060405234801561001057600080fd5b50604080518082019091526009815268474d2c20426173652160b81b602082015260009061003e90826100fc565b50600180546001600160a01b0319163317905560006002556101bb565b634e487b7160e01b600052604160045260246000fd5b600181811c9082168061008557607f821691505b6020821081036100a557634e487b7160e01b600052602260045260246000fd5b50919050565b601f8211156100f7576000816000526020600020601f850160051c810160208610156100d45750805b601f850160051c820191505b818110156100f3578281556001016100e0565b5050505b505050565b81516001600160401b038111156101155761011561005b565b610129816101238454610071565b846100ab565b602080601f83116001811461015e57600084156101465750858301515b600019600386901b1c1916600185901b1785556100f3565b600085815260208120601f198616915b8281101561018d5788860151825594840194600190910190840161016e565b50858210156101ab5787850151600019600388901b60f8161c191681555b5050505050600190811b01905550565b6106ad806101ca6000396000f3fe608060405234801561001057600080fd5b506004361061007d5760003560e01c80638cb092821161005b5780638cb09282146100cb578063c1205405146100e0578063ef690cc0146100f3578063fe50cc721461010857600080fd5b80630df91de2146100825780632a6b5aee1461009e57806386dec2eb146100a6575b600080fd5b61008b60025481565b6040519081526020015b60405180910390f35b60025461008b565b6001546001600160a01b03165b6040516001600160a01b039091168152602001610095565b6100de6100d9366004610336565b610110565b005b6001546100b3906001600160a01b031681565b6100fb610200565b604051610095919061040b565b6100fb61028e565b60008151116101655760405162461bcd60e51b815260206004820152601760248201527f4d6573736167652063616e6e6f7420626520656d707479000000000000000000604482015260640160405180910390fd5b80604051602001610176919061043e565b604051602081830303815290604052600090816101939190610500565b50600180546001600160a01b03191633179055600280549060006101b6836105c0565b9190505550336001600160a01b03167fcc632ed99b4e1449da24f94022f3fd718e80792d61c88a91e41fab59ae87a6eb60006040516101f591906105e7565b60405180910390a250565b6000805461020d90610475565b80601f016020809104026020016040519081016040528092919081815260200182805461023990610475565b80156102865780601f1061025b57610100808354040283529160200191610286565b820191906000526020600020905b81548152906001019060200180831161026957829003601f168201915b505050505081565b60606000805461029d90610475565b80601f01602080910402602001604051908101604052809291908181526020018280546102c990610475565b80156103165780601f106102eb57610100808354040283529160200191610316565b820191906000526020600020905b8154815290600101906020018083116102f957829003601f168201915b5050505050905090565b634e487b7160e01b600052604160045260246000fd5b60006020828403121561034857600080fd5b813567ffffffffffffffff8082111561036057600080fd5b818401915084601f83011261037457600080fd5b81358181111561038657610386610320565b604051601f8201601f19908116603f011681019083821181831017156103ae576103ae610320565b816040528281528760208487010111156103c757600080fd5b826020860160208301376000928101602001929092525095945050505050565b60005b838110156104025781810151838201526020016103ea565b50506000910152565b602081526000825180602084015261042a8160408501602087016103e7565b601f01601f19169190910160400192915050565b63023a696160e51b81526000825161045d8160048501602087016103e7565b602160f81b6004939091019283015250600501919050565b600181811c9082168061048957607f821691505b6020821081036104a957634e487b7160e01b600052602260045260246000fd5b50919050565b601f8211156104fb576000816000526020600020601f850160051c810160208610156104d85750805b601f850160051c820191505b818110156104f7578281556001016104e4565b5050505b505050565b815167ffffffffffffffff81111561051a5761051a610320565b61052e816105288454610475565b846104af565b602080601f831160018114610563576000841561054b5750858301515b600019600386901b1c1916600185901b1785556104f7565b600085815260208120601f198616915b8281101561059257888601518255948401946001909101908401610573565b50858210156105b05787850151600019600388901b60f8161c191681555b5050505050600190811b01905550565b6000600182016105e057634e487b7160e01b600052601160045260246000fd5b5060010190565b60006020808352600084546105fb81610475565b806020870152604060018084166000811461061d576001811461063957610669565b60ff19851660408a0152604084151560051b8a01019550610669565b89600052602060002060005b858110156106605781548b8201860152908301908801610645565b8a016040019650505b50939897505050505050505056fea2646970667358221220b2f9c4437e8992883b74f70ee6dc13eb7b93390b677b0139c9e0f5b46e82f70d64736f6c63430008180033
+        const contractBytecode = "0x..."; // Wklej tutaj bytecode swojego kontraktu
+
+        let web3;
+        let contract;
+        let userAccount;
+
+        // Inicjalizacja połączenia z MetaMask
+        async function init() {
+            if (typeof window.ethereum !== 'undefined') {
+                web3 = new Web3(window.ethereum);
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    userAccount = accounts[0];
+                    console.log("Connected account:", userAccount);
+
+                    // Wdróż kontrakt, jeśli nie jest jeszcze wdrożony
+                    if (!contract) {
+                        const deployTx = new web3.eth.Contract(contractABI).deploy({
+                            data: contractBytecode,
+                        });
+
+                        const gas = await deployTx.estimateGas();
+                        const gasPrice = await web3.eth.getGasPrice();
+
+                        const deployedContract = await deployTx.send({
+                            from: userAccount,
+                            gas,
+                            gasPrice,
+                        });
+
+                        contract = deployedContract;
+                        console.log("Contract deployed at:", contract.options.address);
+                    }
+
+                    // Nasłuchuj na zdarzenie NewGM
+                    contract.events.NewGM()
+                        .on('data', (event) => {
+                            console.log("NewGM event:", event);
+                            updateGreeting(); // Odśwież dane po zdarzeniu
+                        })
+                        .on('error', (error) => {
+                            console.error("Event error:", error);
+                        });
+
+                    updateGreeting();
+                } catch (error) {
+                    console.error("User denied account access or error occurred:", error);
+                    alert("Proszę połączyć swój portfel MetaMask.");
+                }
+            } else {
+                console.log('Please install MetaMask!');
+                alert("Zainstaluj MetaMask, aby korzystać z tej strony!");
+            }
+        }
+
+        // Automatyczne połączenie z MetaMask i wywołanie sayGM
+        async function connectAndSayGM() {
+            if (!userAccount) {
+                await init(); // Połącz z MetaMask, jeśli jeszcze nie połączono
+            }
+
+            const newGreeting = document.getElementById('newGreeting').value;
+            if (!newGreeting) {
+                alert("Wpisz wiadomość!");
+                return;
+            }
+
+            try {
+                await contract.methods.sayGM(newGreeting).send({ from: userAccount });
+                updateGreeting(); // Odśwież dane po wysłaniu transakcji
+            } catch (error) {
+                console.error("Error sending transaction:", error);
+                alert("Wystąpił błąd podczas wysyłania transakcji.");
+            }
+        }
+
+        // Aktualizacja danych na stronie
+        async function updateGreeting() {
+            try {
+                const greeting = await contract.methods.getGreeting().call();
+                const lastGreeter = await contract.methods.getLastGreeter().call();
+                const greetingCount = await contract.methods.getGreetingCount().call();
+                document.getElementById('currentGreeting').textContent = greeting;
+                document.getElementById('lastGreeter').textContent = lastGreeter;
+                document.getElementById('greetingCount').textContent = greetingCount;
+            } catch (error) {
+                console.error("Error updating greeting:", error);
+            }
+        }
+
+        // Inicjalizacja po załadowaniu strony
+        window.onload = init;
+    </script>
+</body>
+</html>

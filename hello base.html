@@ -1,0 +1,113 @@
+Oczywiście! Poniżej znajduje się pełny kod HTML, który możesz skopiować, zapisać jako plik `.html`, a następnie przesłać na GitHub. Ten plik umożliwia wdrożenie Twojego smart contractu na sieci Base (lub innej sieci Ethereum) poprzez interakcję z MetaMask.
+
+---
+
+### Plik HTML do wysłania na GitHub
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Wdróż swój Smart Contract</title>
+  <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
+</head>
+<body>
+  <h1>Wdróż swój Smart Contract</h1>
+  <p>Kliknij przycisk poniżej, aby wdrożyć swój kontrakt na sieci Base.</p>
+  <button id="deployButton">Wdróż Kontrakt</button>
+  <p id="status"></p>
+
+  <script>
+    // Sprawdź, czy MetaMask jest zainstalowany
+    if (typeof window.ethereum !== 'undefined') {
+      console.log('MetaMask jest zainstalowany!');
+      const web3 = new Web3(window.ethereum);
+      window.ethereum.enable(); // Prośba o dostęp do konta
+    } else {
+      alert('Zainstaluj MetaMask, aby korzystać z tej strony!');
+    }
+
+    // ABI Twojego kontraktu
+    const contractABI = [
+      {
+        "type": "constructor",
+        "inputs": [],
+        "stateMutability": "nonpayable"
+      },
+      {
+        "type": "function",
+        "name": "getGreeting",
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "",
+            "type": "string",
+            "internalType": "string"
+          }
+        ],
+        "stateMutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "getGreetingCount",
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "",
+            "type": "uint256",
+            "internalType": "uint256"
+          }
+        ],
+        "stateMutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "getLastGreeter",
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "",
+            "type": "address",
+            "internalType": "address"
+          }
+        ],
+        "stateMutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "greeting",
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "",
+            "type": "string",
+            "internalType": "string"
+          }
+        ],
+        "stateMutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "greetingCount",
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "",
+            "type": "uint256",
+            "internalType": "uint256"
+          }
+        ],
+        "stateMutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "lastGreeter",
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "",
+            "type": "address",
+            "internalType": "address"
+          }
+        ],
+        "stateMutability
